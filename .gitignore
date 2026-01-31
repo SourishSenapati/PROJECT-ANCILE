@@ -6,3 +6,9 @@ __pycache__/
 env/
 venv/
 *.log
+*.csv
+*.onnx
+ml_engine/
+scan_tbo_v2.py
+verify_tbo.py
+docker-compose.yml
