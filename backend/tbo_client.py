@@ -65,7 +65,7 @@ class TBOClient:
             else:
                 error_msg = data.get('Error', {}).get('ErrorMessage')
                 logger.error("TBO Auth Failed: %s", error_msg)
-                raise Exception(
+                raise ConnectionError(
                     f"Authentication Failed: {error_msg}") from None
 
         except requests.RequestException as e:

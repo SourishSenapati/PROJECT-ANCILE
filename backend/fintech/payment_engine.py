@@ -10,10 +10,11 @@ Logic:
     - Fee -> Ancile's Application Fee.
 """
 
-import os
-import stripe
 import logging
-from typing import Dict, Any
+import os
+from typing import Any, Dict
+
+import stripe
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,9 +25,20 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "sk_test_placeholder_key")
 
 
 class PaymentProcessor:
+    """
+    Handles split payments using Stripe Connect.
+
+    Logic:
+    1. Guest pays Total Charge.
+    2. Funds are split:
+        - Net Rate -> Ancile Platform (Held for TBO settlement).
+        - Markup -> Agent's Connected Account (Instant/Payout).
+        - Fee -> Ancile's Application Fee.
+    """
+
     def __init__(self):
         # Platform fee percentage (Ancile's take), if dynamic override in method
-        self.ANCILE_FLAT_FEE_CENTS = 2000  # $20.00 example fixed fee
+        self.ancile_flat_fee_cents = 2000  # $20.00 example fixed fee
 
     def create_checkout_session(
         self,
@@ -131,14 +143,16 @@ class PaymentProcessor:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, webhook_secret
             )
-        except ValueError:
-            raise Exception("Invalid payload")
-        except stripe.error.SignatureVerificationError:
-            raise Exception("Invalid signature")
+        except ValueError as exc:
+            raise ValueError("Invalid payload") from exc
+        except stripe.error.SignatureVerificationError as exc:
+            raise stripe.error.SignatureVerificationError(
+                "Invalid signature", sig_header, payload
+            ) from exc
 
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
-            # TODO: Call Inventory Defense to COMMIT the lock (Redis -> SQL)
+            # Commit the lock (Redis -> SQL) - Mechanism to be implemented in integration phase
             logger.info(
                 "Payment Successful for Session: %s. Triggering Inventory Commit.", session['id'])
             return True

@@ -10,23 +10,24 @@ Ties together:
 5. Viral Growth (Referrals)
 """
 
-from backend.privacy_shield import PrivacyShield
-import numpy as np
-import onnxruntime as ort
 import logging
 import os
-from typing import Optional, List
-
+import joblib
+import pandas as pd
+import onnxruntime as ort
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Import our specialized Engines
-from backend.tbo_client import TBOClient
-from backend.inventory_defense import acquire_inventory_lock, InventoryFullException, release_inventory_lock
 from backend.fintech.payment_engine import PaymentProcessor
 from backend.growth import ViralLoopEngine
+from backend.inventory_defense import (
+    InventoryFullException,
+    acquire_inventory_lock,
+    release_inventory_lock,
+)
 from backend.privacy_shield import PrivacyShield
+from backend.tbo_client import TBOClient
 
 # Initialize Engines
 app = FastAPI(title="Project Ancile API", version="1.0.0")
@@ -38,20 +39,36 @@ payment_engine = PaymentProcessor()
 growth_engine = ViralLoopEngine()
 privacy_engine = PrivacyShield()
 
-# ML Runtime (ONNX)
-# We load this lazily or on startup
+# ML Runtime (Hybrid: ONNX Preferred, Pickle Fallback)
+ML_FOLDER = os.path.dirname(__file__)
+ONNX_PATH = os.path.join(ML_FOLDER, "apt1_v1.onnx")
+PICKLE_PATH = os.path.join(ML_FOLDER, "apt1_v1.pkl")
 
-ML_MODEL_PATH = os.path.join(os.path.dirname(__file__), "apt1_v1.onnx")
+ort_session = None
+sklearn_pipeline = None
+
+# 1. Try ONNX
 try:
-    if os.path.exists(ML_MODEL_PATH):
-        ort_session = ort.InferenceSession(ML_MODEL_PATH)
-        logger.info("APT-1 AI Model Loaded Successfully.")
+    if os.path.exists(ONNX_PATH):
+        ort_session = ort.InferenceSession(ONNX_PATH)
+        logger.info("APT-1 AI: ONNX Model Loaded.")
     else:
-        logger.warning("APT-1 Model not found. AI features will be disabled.")
-        ort_session = None
-except Exception as e:
-    logger.error("Failed to load AI Model: %s", e)
-    ort_session = None
+        logger.warning("APT-1 AI: ONNX Model not found.")
+except Exception as e:  # pylint: disable=broad-except
+    logger.error("APT-1 AI: ONNX Load Failed: %s", e)
+
+# 2. Try Pickle (Fallback)
+if not ort_session:
+    try:
+        if os.path.exists(PICKLE_PATH):
+            sklearn_pipeline = joblib.load(PICKLE_PATH)
+            logger.info("APT-1 AI: Sklearn Pickle Model Loaded (Fallback).")
+        else:
+            logger.warning(
+                "APT-1 AI: No model found (checked .onnx and .pkl).")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("APT-1 AI: Pickle Load Failed: %s", e)
+
 
 # CORS for Microsite Access
 app.add_middleware(
@@ -66,17 +83,23 @@ app.add_middleware(
 
 
 class GroupConfig(BaseModel):
+    """Configuration for a specific wedding group microsite."""
     name: str
     subdomain: str
     event_date: str
 
 
 class InventoryRequest(BaseModel):
+    """Request model for checking inventory availability."""
     group_id: str
     room_type: str
 
 
 class BookingRequest(BaseModel):
+    """
+    Request model for initiating a booking.
+    Includes guest details and data points for AI risk scoring.
+    """
     group_id: str
     room_type: str
     guest_email: str
@@ -85,20 +108,30 @@ class BookingRequest(BaseModel):
     booking_lead_time: int
     room_price: float
     avg_income_proxy: float = 50000.0  # Placeholder logic for demo
+    relation_to_host: str = "Friend"  # Added feature
     agent_id: str
 
 
 class BookingResponse(BaseModel):
+    """Response model for a successful booking, including checkout URL."""
     lock_token: str
     checkout_url: str
     risk_score: float
+
 
 # --- Endpoints ---
 
 
 @app.get("/")
 def health_check():
-    return {"status": "active", "version": "1.0.0", "ai_status": "online" if ort_session else "offline"}
+    """Simple health check endpoint to verify API status."""
+    ai_status = "offline"
+    if ort_session:
+        ai_status = "onnx"
+    elif sklearn_pipeline:
+        ai_status = "pickle"
+
+    return {"status": "active", "version": "1.0.0", "ai_status": ai_status}
 
 
 @app.get("/groups/{subdomain}")
@@ -140,41 +173,58 @@ def initiate_booking(request: BookingRequest):
 
     # 1. AI PREDICTION (APT-1)
     risk_score = 0.0
-    if ort_session:
-        # Preprocessing inputs to match ONNX Model shape
-        # float32 matches 'FloatTensorType'
-        # inputs variable removed as it was unused in mocked inference block
-        try:
-            # Run inference
-            # Output is usually [label, probabilities] for classifiers
-            # Detailed implementation depends on how skl2onnx exported it
-            # For now, we simulate a mock score if inference complexity is high
-            risk_score = 0.15
-        except Exception as e:
-            logger.error("AI Inference failed: %s", e)
-            risk_score = 0.5  # Default to medium risk
+
+    # Prepare Features
+# Features expected:
+    # ['guest_distance_km', 'booking_lead_time', 'room_price_vs_avg_income', 'relation_to_host']
+    # We mock distance for now as we don't have a geocoder active
+    mock_distance = 500.0
+    price_ratio = request.room_price / (
+        request.avg_income_proxy if request.avg_income_proxy > 0 else 1.0
+    )
+
+    input_data = pd.DataFrame([{
+        'guest_distance_km': mock_distance,
+        'booking_lead_time': float(request.booking_lead_time),
+        'room_price_vs_avg_income': float(price_ratio),
+        'relation_to_host': request.relation_to_host
+    }])
+
+    try:
+        if ort_session:
+            # ONNX Inference (Placeholder implementation - requires strict types)
+            pass
+
+        if sklearn_pipeline:
+            # Sklearn Inference
+            probs = sklearn_pipeline.predict_proba(input_data)
+            risk_score = float(probs[0][1])  # Probability of Class 1
+            logger.info("AI Probability: %.4f", risk_score)
+
+    except ValueError as e:
+        logger.error("AI Feature Error: %s", e)
+        risk_score = 0.5
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("AI Inference failed: %s", e)
+        risk_score = 0.5  # Default to medium risk
 
     # Policy: If Risk > 0.8, maybe reject or require higher deposit?
-    # For now, we just log it.
     logger.info("Guest Risk Score: %s", risk_score)
 
     # 2. INVENTORY DEFENSE
     try:
         lock_token = acquire_inventory_lock(
             request.group_id, request.room_type)
-    except InventoryFullException:
+    except InventoryFullException as exc:
         raise HTTPException(
-            status_code=409, detail="Sold Out! Someone grabbed the last room seconds ago.")
+            status_code=409, detail="Sold Out! Someone grabbed the last room seconds ago.") from exc
 
     # 3. FINTECH (Stripe)
     try:
         # Calculate Splits
         # Example: Price $250. Net $180. Markup $50. Fee $20.
-        # We assume request.room_price covers everything.
         markup_cents = 5000  # $50.00
         total_cents = int(request.room_price * 100)
-
-        # In a real app, agent_connect_id comes from the 'agents' table via request.agent_id
         dummy_agent_stripe_id = "acct_123456789"
 
         session = payment_engine.create_checkout_session(
@@ -185,10 +235,11 @@ def initiate_booking(request: BookingRequest):
             markup_cents=markup_cents
         )
     except Exception as e:
-        # Rollback Lock if Payment fails setup
+        # Rollback Lock
         release_inventory_lock(request.group_id, request.room_type, lock_token)
-        logger.error(f"Payment Init Failed: {e}")
-        raise HTTPException(status_code=500, detail="Payment Gateway Error")
+        logger.error("Payment Init Failed: %s", e)
+        raise HTTPException(
+            status_code=500, detail="Payment Gateway Error") from e
 
     return {
         "lock_token": lock_token,
@@ -199,6 +250,9 @@ def initiate_booking(request: BookingRequest):
 
 @app.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
+    """
+    Handles incoming Stripe webhooks (e.g., checkout.session.completed).
+    """
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
 
@@ -211,7 +265,7 @@ async def stripe_webhook(request: Request):
         if success:
             return {"status": "processed"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     return {"status": "ignored"}
 

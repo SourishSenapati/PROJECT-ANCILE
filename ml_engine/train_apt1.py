@@ -86,9 +86,16 @@ def train_and_export():
     print("Exporting Model...")
 
     # Always save pickle as primary fallback
-    pickle_path = "apt1_v1.pkl"
-    joblib.dump(pipeline, pickle_path)
-    print(f"Pickle Model saved to {pickle_path}")
+    pickle_filename = "apt1_v1.pkl"
+    # Save locally in ml_engine
+    joblib.dump(pipeline, pickle_filename)
+    print(f"Pickle Model saved locally to {pickle_filename}")
+
+    # Copy pickle to backend so main.py can find it if ONNX is missing
+    backend_pickle_path = os.path.join(
+        os.path.dirname(__file__), "../backend", pickle_filename)
+    joblib.dump(pipeline, backend_pickle_path)
+    print(f"Pickle Model copied to {backend_pickle_path}")
 
     # Try ONNX
     try:
@@ -102,19 +109,23 @@ def train_and_export():
             ('relation_to_host', StringTensorType([None, 1]))
         ]
 
-        # Simple attempt without complex registration if imports failed
-        if convert_xgboost is None:
-            raise ImportError("xgboost converter not available")
+        # Register converter if available
+        if convert_xgboost:
+            try:
+                update_registered_converter(
+                    XGBClassifier,
+                    'XGBoostXGBClassifier',
+                    calculate_linear_classifier_output_shapes,
+                    convert_xgboost,
+                    options={'nocl': [True, False],
+                             'zipmap': [True, False, 'columns']}
+                )
+            except Exception as e:
+                print(f"Converter registration warning: {e}")
 
-        update_registered_converter(
-            XGBClassifier,
-            'XGBoostXGBClassifier',
-            calculate_linear_classifier_output_shapes,
-            convert_xgboost,
-            options={'nocl': [True, False], 'zipmap': [True, False, 'columns']}
-        )
-
-        onnx_model = convert_sklearn(
+        # Attempt conversion
+        # allow_interiops=True helps with some version mismatches
+        onx = convert_sklearn(
             pipeline,
             initial_types=initial_types,
             target_opset=12
@@ -126,13 +137,13 @@ def train_and_export():
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
         with open(output_path, "wb") as f:
-            f.write(onnx_model.SerializeToString())
+            f.write(onx.SerializeToString())
 
         print(f"ONNX Model saved to {output_path}")
 
     except Exception as e:
         print(f"ONNX Export execution skipped/failed: {e}")
-        print("Check 'apt1_v1.pkl' for the working model.")
+        print("Using .pkl model in backend instead.")
 
 
 if __name__ == "__main__":

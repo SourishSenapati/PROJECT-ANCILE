@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+stripe
+redis
+requests
+pandas
+joblib
+scikit-learn
+xgboost
+onnxruntime

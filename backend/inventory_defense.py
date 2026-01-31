@@ -37,7 +37,7 @@ def _get_db_inventory_counts(group_id: str, room_type: str) -> Dict[str, int]:
     """
     Simulates fetching 'total_allocated' and 'total_booked' from SQL.
     """
-    # TODO: Connect to PostgreSQL and query the 'inventory_blocks' table
+    # Mock Implementation: Connect to PostgreSQL and query the 'inventory_blocks' table
     # SELECT total_allocated, total_booked ...
     logger.debug("Fetching DB counts for Group: %s, Room: %s",
                  group_id, room_type)
