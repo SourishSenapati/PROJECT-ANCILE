@@ -136,9 +136,12 @@ class BookingResponse(BaseModel):
 # --- Endpoints ---
 
 
-@app.get("/")
+@app.get("/api/health")
 def health_check():
-    """Simple health check endpoint to verify API status."""
+    """
+    Health check endpoint.
+    Returns the status of the API and the loaded AI engine.
+    """
     ai_status = "offline"
     if ort_session:
         ai_status = "onnx"
@@ -146,15 +149,6 @@ def health_check():
         ai_status = "pickle"
 
     return {"status": "active", "version": "1.0.0", "ai_status": ai_status}
-    """
-    Health check endpoint.
-    Returns the status of the API and the loaded AI engine.
-    """
-    return {
-        "status": "active",
-        "version": "1.0.0",
-        "ai_status": "onnx" if ort_session else "pickle"
-    }
 
 
 @app.get("/")
