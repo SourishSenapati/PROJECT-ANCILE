@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ancile | Exclusive Hotel Access</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Navigation -->
+      <nav class="glass-nav">
+        <div class="logo">ANCILE</div>
+        <div class="nav-links">
+          <a href="#inventory">Availability</a>
+          <a href="#my-booking">My Booking</a>
+          <button class="btn-primary" id="connect-wallet">Member Access</button>
+        </div>
+      </nav>
+
+      <!-- Hero Section -->
+      <header class="hero-section">
+        <div class="hero-content">
+          <span class="badge">Exclusive Group Access</span>
+          <h1>Secure Your Stay.<br />Atomically Guaranteed.</h1>
+          <p>
+            Real-time inventory management for high-demand events. Zero
+            overbookings. Instant confirmation.
+          </p>
+          <div class="hero-search glass-card">
+            <div class="input-group">
+              <label for="event-code">Event Code</label>
+              <input id="event-code" type="text" value="WED-DXB-2026" readonly />
+            </div>
+            <div class="input-group">
+              <label for="event-dates">Dates</label>
+              <input id="event-dates" type="text" value="May 1 - May 5, 2026" readonly />
+            </div>
+            <button class="btn-action">Check Availability</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <!-- 3D visual placeholder or CSS art -->
+          <div class="orbital-ring"></div>
+          <div class="orbital-ring inner"></div>
+        </div>
+      </header>
+
+      <!-- Inventory Grid -->
+      <section id="inventory" class="inventory-section">
+        <h2>Live Inventory</h2>
+        <div class="grid-container" id="room-grid">
+          <!-- Cards will be injected by JS -->
+          <div class="room-card glass-card">
+            <div class="room-image room-royal">
+              <span class="stock-tag low">Only 2 Left</span>
+            </div>
+            <div class="room-details">
+              <h3>Royal Suite</h3>
+              <p class="price">$450 <span>/ night</span></p>
+              <ul class="features">
+                <li>King Bed</li>
+                <li>Ocean View</li>
+                <li>Butler Service</li>
+              </ul>
+              <button class="btn-primary full-width">
+                Book Now via Ancile
+              </button>
+            </div>
+          </div>
+
+          <div class="room-card glass-card">
+            <div class="room-image room-exec">
+              <span class="stock-tag">Available</span>
+            </div>
+            <div class="room-details">
+              <h3>Executive Room</h3>
+              <p class="price">$280 <span>/ night</span></p>
+              <ul class="features">
+                <li>Queen Bed</li>
+                <li>City View</li>
+                <li>Workstation</li>
+              </ul>
+              <button class="btn-primary full-width">
+                Book Now via Ancile
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dynamic Ticker -->
+      <div class="live-ticker">
+        <span>LIVE: User 0x7a... just secured a room (2s ago)</span>
+        <span>•</span>
+        <span>Inventory Locked: 84%</span>
+        <span>•</span>
+        <span>APT-1 Risk Analysis: Low</span>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+  </body>
+</html>
