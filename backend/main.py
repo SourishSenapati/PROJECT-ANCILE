@@ -17,7 +17,10 @@ import pandas as pd
 import onnxruntime as ort
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
+import sys
 
 from backend.fintech.payment_engine import PaymentProcessor
 from backend.growth import ViralLoopEngine
@@ -29,15 +32,18 @@ from backend.inventory_defense import (
 from backend.privacy_shield import PrivacyShield
 from backend.tbo_client import TBOClient
 
-# Initialize Engines
-app = FastAPI(title="Project Ancile API", version="1.0.0")
-logger = logging.getLogger("uvicorn")
+# Initialize App
+app = FastAPI(title="Project Ancile Backend", version="1.0.0")
+
+# Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("ancile_backend")
 
 # Engines
-tbo_engine = TBOClient()
 payment_engine = PaymentProcessor()
-growth_engine = ViralLoopEngine()
-privacy_engine = PrivacyShield()
+# growth_engine = ViralLoopEngine() # Feature flag disabled for Phase 1
+# privacy_engine = PrivacyShield() # Initialized later if needed
+# tbo_engine = TBOClient() # Feature flag disabled
 
 # ML Runtime (Hybrid: ONNX Preferred, Pickle Fallback)
 ML_FOLDER = os.path.dirname(__file__)
@@ -70,10 +76,18 @@ if not ort_session:
         logger.error("APT-1 AI: Pickle Load Failed: %s", e)
 
 
-# CORS for Microsite Access
+# CORS Configuration
+origins = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://project-ancile.vercel.app",
+    "https://project-ancile.onrender.com",
+    "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to *.ancile.app
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -132,21 +146,42 @@ def health_check():
         ai_status = "pickle"
 
     return {"status": "active", "version": "1.0.0", "ai_status": ai_status}
-
-
-@app.get("/groups/{subdomain}")
-def get_group_microsite_config(subdomain: str):
     """
-    Powers the Microsite: Returns the branding, event details, and AVAILABLE inventory blocks.
-    Real-time TBO check + Database check would happen here.
+    Health check endpoint.
+    Returns the status of the API and the loaded AI engine.
     """
-    # Mock Response for Prototype
-    # In real world: Query DB for group_id by subdomain
-    logger.info("Fetching config for subdomain: %s", subdomain)
     return {
-        "group_id": "grp_12345",
-        "name": "Smith-Jones Wedding",
-        "hero_image": "https://example.com/wedding.jpg",
+        "status": "active",
+        "version": "1.0.0",
+        "ai_status": "onnx" if ort_session else "pickle"
+    }
+
+
+@app.get("/")
+def read_root():
+    """
+    Serves the main frontend Single Page Application (SPA).
+    """
+    return FileResponse('frontend/index.html')
+
+
+# Mount frontend static files (CSS, JS)
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+# --- Endpoints ---
+
+
+@app.get("/groups/{group_id}")
+def get_group_config(group_id: str):
+    """
+    Retrieves the configuration for a specific group microsite.
+    In a real app, this would fetch from a database.
+    """
+    # Mock Data
+    return {
+        "group_id": group_id,
+        "microsite_url": f"https://{group_id}.ancile.app",
+        "theme": "dark_modern",
         "inventory": [
             {
                 "room_type": "DELUXE_OCEAN",
