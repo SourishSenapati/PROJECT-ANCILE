@@ -11,4 +11,5 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # pylint: disable=unused-import
-from backend.main import app  # noqa: F401
+# pylint: disable=postponed-import, wrong-import-position
+from backend.main import app  # noqa: F401, E402
