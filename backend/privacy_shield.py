@@ -5,10 +5,10 @@ Handles local, edge-based processing of sensitive Guest PII using Ollama (Llama-
 Crucial for "Celebrity Shield" feature where names never leave the laptop.
 """
 
-import requests
 import json
 import logging
 from typing import Dict, Any
+import requests
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -20,6 +20,10 @@ MODEL_NAME = "llama3:8b-instruct-q4_0"  # Or just 'llama3' depending on pull
 
 
 class PrivacyShield:
+    """
+    Manages connection to local LLM for PII redaction.
+    """
+
     def __init__(self):
         self.is_active = self._check_connection()
 
@@ -98,13 +102,19 @@ class PrivacyShield:
                 }
             }
 
-        except Exception as e:
-            logger.error(f"Privacy Shield Analysis Failed: {e}")
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error("Privacy Shield Analysis Failed: %s", e)
             return {"error": str(e)}
 
 
 # Test Logic
 if __name__ == "__main__":
-    shield = PrivacyShield()
-    dummy_text = "John Doe (VIP, Vegan), Jane Smith (Bride Side, GF), Elon Musk (Ultra VIP, Paleo)"
-    print(shield.sanitize_guest_list(dummy_text))
+    try:
+        shield = PrivacyShield()
+        DUMMY_TEXT = (
+            "John Doe (VIP, Vegan), Jane Smith (Bride Side, GF), "
+            "Elon Musk (Ultra VIP, Paleo)"
+        )
+        print(shield.sanitize_guest_list(DUMMY_TEXT))
+    except Exception as e:  # pylint: disable=broad-except
+        print(f"Test failed: {e}")

@@ -6,7 +6,7 @@ Manages the 'Agent Referral' system to create network effects.
 
 import logging
 import uuid
-from typing import Optional, Dict
+# from typing import Optional, Dict # Unused
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,8 +18,12 @@ MOCK_AGENT_DB = {}
 
 
 class ViralLoopEngine:
+    """
+    Manages referral logic, commission overrides, and viral growth tracking.
+    """
+
     def __init__(self):
-        self.REFERRAL_OVERRIDE_PERCENT = 0.5  # 0.5% Commission Override
+        self.referral_override_percent = 0.5  # 0.5% Commission Override
 
     def generate_referral_footer(self, agent_id: str, agent_name: str) -> str:
         """
@@ -28,11 +32,14 @@ class ViralLoopEngine:
         referral_link = f"https://ancile.app/become-agent?ref={agent_id}"
 
         footer_html = f"""
-        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; font-family: sans-serif; color: #666;">
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;
+                    text-align: center; font-family: sans-serif; color: #666;">
             <p>Your trip is managed by <strong>{agent_name}</strong> using Project Ancile.</p>
             <p style="font-size: 12px;">
                 Planning your own group trip? 
-                <a href="{referral_link}" style="color: #007bff; text-decoration: none;">Launch your business with Ancile.</a>
+                <a href="{referral_link}" style="color: #007bff; text-decoration: none;">
+                    Launch your business with Ancile.
+                </a>
             </p>
         </div>
         """
@@ -58,8 +65,8 @@ class ViralLoopEngine:
         Calculates the passive income for the referrer based on the sub-agent's volume.
         """
         override_amount = (new_agent_volume *
-                           self.REFERRAL_OVERRIDE_PERCENT) / 100
-        logger.info("Commission Override: Agent %s earned $%0.2f from downstream volume.",
+                           self.referral_override_percent) / 100
+        logger.info("Commission Override: Agent %s earned $%.2f from downstream volume.",
                     referrer_id, override_amount)
         return override_amount
 
@@ -69,14 +76,14 @@ if __name__ == "__main__":
     growth = ViralLoopEngine()
 
     # 1. Generate Footer
-    aid = str(uuid.uuid4())
+    AID = str(uuid.uuid4())
     print("\n--- Email Footer ---")
-    print(growth.generate_referral_footer(aid, "Sarah Smith Travel"))
+    print(growth.generate_referral_footer(AID, "Sarah Smith Travel"))
 
     # 2. Track Conversion
-    new_aid = str(uuid.uuid4())
-    growth.track_conversion(new_aid, aid)
+    NEW_AID = str(uuid.uuid4())
+    growth.track_conversion(NEW_AID, AID)
 
     # 3. Calc Revenue
     # $50k volume -> $250 passive income
-    growth.calculate_override(aid, 50000.00)
+    growth.calculate_override(AID, 50000.00)

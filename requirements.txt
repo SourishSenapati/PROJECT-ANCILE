@@ -9,3 +9,5 @@ joblib
 scikit-learn
 xgboost
 onnxruntime
+skl2onnx
+onnxmltools
