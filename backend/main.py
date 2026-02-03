@@ -10,18 +10,15 @@ Ties together:
 5. Viral Growth (Referrals)
 """
 
-from fastapi import UploadFile, File
-import shutil
 import logging
 import os
-# import sys  # Unused
+import random
+import shutil
+import uuid
 
 import joblib
-import pandas as pd
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import APIRouter, FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from backend.fintech.payment_engine import PaymentProcessor
@@ -139,36 +136,25 @@ class IdentityVerificationResponse(BaseModel):
 # --- Endpoints ---
 
 
-@app.get("/api/health")
+# All other routes should be prefixed with /api
+# We use a router to manage this cleanly
+router = APIRouter(prefix="/api")
+
+
+@router.get("/health")
 def health_check():
     """
     Health check endpoint.
     Returns the status of the API and the loaded AI engine.
     """
     ai_status = "offline"
-    if ort_session:
-        ai_status = "onnx"
-    elif sklearn_pipeline:
+    if sklearn_pipeline:
         ai_status = "pickle"
 
     return {"status": "active", "version": "1.0.0", "ai_status": ai_status}
 
 
-@app.get("/")
-def read_root():
-    """
-    Serves the main frontend Single Page Application (SPA).
-    """
-    return FileResponse('frontend/index.html')
-
-
-# Mount frontend static files (CSS, JS)
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
-
-# --- Endpoints ---
-
-
-@app.get("/groups/{group_id}")
+@router.get("/groups/{group_id}")
 def get_group_config(group_id: str):
     """
     Retrieves the configuration for a specific group microsite.
@@ -194,7 +180,7 @@ def get_group_config(group_id: str):
     }
 
 
-@app.post("/bookings/initiate", response_model=BookingResponse)
+@router.post("/bookings/initiate", response_model=BookingResponse)
 def initiate_booking(request: BookingRequest):
     """
     The Core Transaction Flow:
@@ -206,8 +192,7 @@ def initiate_booking(request: BookingRequest):
     # 1. AI PREDICTION (APT-1)
     risk_score = 0.0
 
-    # Prepare Features
-# Features expected:
+    # Features expected:
     # ['guest_distance_km', 'booking_lead_time', 'room_price_vs_avg_income', 'relation_to_host']
     # We mock distance for now as we don't have a geocoder active
     mock_distance = 500.0
@@ -215,12 +200,13 @@ def initiate_booking(request: BookingRequest):
         request.avg_income_proxy if request.avg_income_proxy > 0 else 1.0
     )
 
-    input_data = pd.DataFrame([{
-        'guest_distance_km': mock_distance,
-        'booking_lead_time': float(request.booking_lead_time),
-        'room_price_vs_avg_income': float(price_ratio),
-        'relation_to_host': request.relation_to_host
-    }])
+    # Preparation for index-based preprocessor [0: dist, 1: lead, 2: price, 3: role]
+    input_data = [[
+        mock_distance,
+        float(request.booking_lead_time),
+        float(price_ratio),
+        str(request.relation_to_host)
+    ]]
 
     try:
         if sklearn_pipeline:
@@ -279,7 +265,7 @@ def initiate_booking(request: BookingRequest):
     }
 
 
-@app.post("/webhook/stripe")
+@router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
     """
     Handles incoming Stripe webhooks (e.g., checkout.session.completed).
@@ -306,15 +292,12 @@ async def stripe_webhook(request: Request):
 verification_tasks = {}
 
 
-@app.post("/identity/verify", response_model=IdentityVerificationResponse)
+@router.post("/identity/verify", response_model=IdentityVerificationResponse)
 async def verify_identity(request: IdentityVerificationRequest):
     """
     Simulates a high-security identity verification process.
     Integrates with 'PrivacyShield' for anonymized logging.
     """
-    import uuid
-    import random
-
     verification_id = str(uuid.uuid4())
 
     # Simulate high-security processing
@@ -344,7 +327,7 @@ async def verify_identity(request: IdentityVerificationRequest):
     }
 
 
-@app.get("/identity/status/{verification_id}", response_model=IdentityVerificationResponse)
+@router.get("/identity/status/{verification_id}", response_model=IdentityVerificationResponse)
 def get_identity_status(verification_id: str):
     """
     Check the status of a specific identity verification task.
@@ -363,11 +346,14 @@ def get_identity_status(verification_id: str):
 
 
 class AdminLogin(BaseModel):
+    """
+    Pydantic model for admin authentication requests.
+    """
     username: str
     password: str
 
 
-@app.post("/auth/login")
+@router.post("/auth/login")
 def admin_login(creds: AdminLogin):
     """
     Simple Admin Login (Hardcoded for Demo).
@@ -377,12 +363,12 @@ def admin_login(creds: AdminLogin):
     raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
-UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+# In Vercel, we can only write to /tmp
+UPLOAD_DIR = "/tmp/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 
-@app.post("/admin/upload-footage")
+@router.post("/admin/upload-footage")
 async def upload_footage(file: UploadFile = File(...)):
     """
     Upload real footage of rooms.
@@ -392,7 +378,8 @@ async def upload_footage(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Upload failed: {e}") from e
 
     return {"filename": file.filename, "url": f"/uploads/{file.filename}"}
 
@@ -401,7 +388,7 @@ async def upload_footage(file: UploadFile = File(...)):
 privacy_engine = PrivacyShield()
 
 
-@app.post("/analyze/vip-shield")
+@router.post("/analyze/vip-shield")
 def analyze_guest_list(raw_text: str):
     """
     Phase 7: Local Edge Processing of Guest Lists.
@@ -421,7 +408,7 @@ def analyze_guest_list(raw_text: str):
     return result
 
 
-@app.get("/analytics/heatmap")
+@router.get("/analytics/heatmap")
 def get_demand_heatmap():
     """
     Phase 8: Strategic Dashboard Data.
@@ -450,7 +437,10 @@ def get_demand_heatmap():
     }
 
 
+# Include the router in the app
+app.include_router(router)
+
 if __name__ == "__main__":
     import uvicorn
-    # Use 0.0.0.0 to expose to local network if needed, but localhost is fine for now
+    # Use 0.0.0.0 to expose to local network if needed
     uvicorn.run(app, host="0.0.0.0", port=8000)

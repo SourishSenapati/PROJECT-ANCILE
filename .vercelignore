@@ -1,14 +1,18 @@
 # Vercel Deployment Optimization
 # ------------------------------
 
-# Ignore local dev/build artifacts
-node_modules/
-.venv/
-venv/
-env/
-__pycache__/
-*.pyc
+# Ignore all node_modules and virtual environments
+**/node_modules/
+**/.venv/
+**/venv/
+**/env/
+**/__pycache__/
+**/*.pyc
 .vercel/
+
+# Ignore local dev/build artifacts
+frontend/dist/
+frontend/node_modules/
 
 # Ignore local data and large source files
 ml_engine/
@@ -17,6 +21,7 @@ ml_engine/
 *.log
 Dockerfile
 docker-compose.yml
+frontend_vanilla/
 
 # Ignore other non-essential files
 LICENSE

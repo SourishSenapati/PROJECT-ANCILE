@@ -3,7 +3,7 @@ pydantic
 stripe
 redis
 requests
-pandas
 joblib
 scikit-learn
-xgboost
+python-multipart
+aiofiles

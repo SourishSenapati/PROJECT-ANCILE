@@ -13,24 +13,40 @@ const LOCATIONS = [
 
 const WorldMap = () => {
     return (
-        <section className="py-24 relative overflow-hidden">
-            <div className="max-w-[1440px] mx-auto px-6 text-center mb-16">
-                <motion.h2 
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    className="text-4xl md:text-5xl font-bold mb-4"
-                >
-                    Global Sanctuary Network
-                </motion.h2>
-                <p className="text-gray-400 max-w-2xl mx-auto">
-                    A distributed network of 142 hardened properties across 38 countries.
-                    Connected by encrypted satellite links.
-                </p>
+        <section className="py-24 relative overflow-hidden bg-black">
+            <div className="max-w-[1440px] mx-auto px-6 mb-16 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-end gap-8">
+                    <div className="text-left">
+                        <motion.h2 
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            className="text-4xl md:text-5xl font-bold mb-4"
+                        >
+                            Global Sanctuary Network
+                        </motion.h2>
+                        <p className="text-gray-400 max-w-xl">
+                            A distributed network of 142 hardened properties across 38 countries.
+                            Connected by encrypted satellite links.
+                        </p>
+                    </div>
+                    <div className="hidden md:grid grid-cols-2 gap-x-8 gap-y-2 text-xs font-mono">
+                        {LOCATIONS.map(loc => (
+                            <div key={loc.id} className="flex items-center gap-2 text-gray-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></span>
+                                <span className="text-white">{loc.city}</span>
+                                <span className="opacity-50">• Safe</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
-            <div className="relative w-full max-w-[1200px] mx-auto aspect-[16/9] bg-[#0f0f12] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+            <div className="relative w-full max-w-[1200px] mx-auto aspect-[16/9] bg-[#0a0a0c] rounded-3xl border border-white/5 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] gloss-effect">
+                {/* Scanner Effect */}
+                <div className="scan-line"></div>
+                
                 {/* Abstract Map Background */}
-                <div className="absolute inset-0 opacity-20" 
+                <div className="absolute inset-0 opacity-[0.15]" 
                     style={{ 
                         backgroundImage: `url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg')`,
                         backgroundSize: 'cover',
@@ -38,32 +54,43 @@ const WorldMap = () => {
                         filter: 'invert(1) grayscale(1)'
                     }}
                 ></div>
+
+                {/* Grid Overlay */}
+                <div className="absolute inset-0" style={{ 
+                    backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)',
+                    backgroundSize: '30px 30px'
+                }}></div>
                 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black"></div>
 
                 {/* Nodes */}
                 {LOCATIONS.map((loc) => (
                     <div 
                         key={loc.id}
-                        className="absolute w-4 h-4"
+                        className="absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
                         style={{ top: loc.y, left: loc.x }}
                     >
-                        <div className="relative flex items-center justify-center">
+                        <div className="relative flex items-center justify-center w-full h-full">
+                            {/* Pinging Rings */}
                             <motion.div 
-                                animate={{ scale: [1, 2, 1], opacity: [0.5, 0, 0.5] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: loc.id * 0.2 }}
-                                className="absolute w-8 h-8 rounded-full bg-[#d4af37]/20"
+                                animate={{ scale: [1, 2.5, 1], opacity: [0.3, 0, 0.3] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: loc.id * 0.3 }}
+                                className="absolute w-12 h-12 rounded-full border border-[#d4af37]/30"
                             ></motion.div>
-                             <motion.div 
-                                animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0, 0.8] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: loc.id * 0.2 }}
-                                className="absolute w-4 h-4 rounded-full bg-[#d4af37]/40"
-                            ></motion.div>
-                            <div className="w-2 h-2 rounded-full bg-[#d4af37] shadow-[0_0_10px_#d4af37]"></div>
                             
-                            {/* Hover Tooltip */}
-                            <div className="absolute top-6 left-1/2 -translate-x-1/2 opacity-0 hover:opacity-100 transition-opacity bg-black/80 border border-white/10 px-3 py-1 rounded text-xs whitespace-nowrap text-[#d4af37]">
-                                {loc.city} • Safe
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#d4af37] shadow-[0_0_15px_#d4af37] z-10 transition-transform group-hover:scale-125"></div>
+                            
+                            {/* Detailed Tooltip */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-20 pointer-events-none">
+                                <div className="bg-[#121214] border border-[#d4af37]/40 p-3 rounded-lg shadow-2xl backdrop-blur-md min-w-[140px]">
+                                    <div className="text-[10px] text-[#d4af37] font-bold tracking-widest uppercase mb-1">Status: Operational</div>
+                                    <div className="text-white font-bold text-sm mb-2">{loc.city} Sanctuary</div>
+                                    <div className="flex gap-1">
+                                        {[1,2,3].map(i => <div key={i} className="h-1 flex-1 bg-green-500/40 rounded-full"></div>)}
+                                    </div>
+                                    <div className="text-[9px] text-gray-500 mt-2 font-mono">ENCRYPTED LINK : ACTIVE</div>
+                                </div>
+                                <div className="w-3 h-3 bg-[#121214] border-r border-b border-[#d4af37]/40 rotate-45 mx-auto -mt-1.5"></div>
                             </div>
                         </div>
                     </div>
