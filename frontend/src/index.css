@@ -161,10 +161,57 @@ p {
   transform: translateY(-8px);
 }
 
+
 /* Refined Typography for Body Text (Apple Style) */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 h1, h2, h3, .brand-font {
     font-family: "Outfit", sans-serif;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Responsive padding */
+  .pt-24 { padding-top: 80px !important; }
+  .px-6 { padding-left: 16px !important; padding-right: 16px !important; }
+  .space-y-24 > * + * { margin-top: 64px !important; }
+  
+  /* Hero text sizing */
+  h1 { font-size: clamp(2rem, 8vw, 3rem) !important; }
+  h2 { font-size: clamp(1.5rem, 6vw, 2rem) !important; }
+  
+  /* Glass card stacking */
+  .glass-card {
+    padding: 16px !important;
+  }
+  
+  /* Grid responsiveness */
+  .grid-cols-auto-fit {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Search bar mobile */
+  .glass-card > div {
+    flex-direction: column !important;
+  }
+  
+  /* Button text sizing */
+  button {
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small devices */
+  .max-w-\[1440px\] {
+    max-width: 100% !important;
+  }
+  
+  /* Modal adjustments */
+  [role="dialog"], .modal {
+    width: 95vw !important;
+    height: 90vh !important;
+    padding: 16px !important;
+  }
 }
