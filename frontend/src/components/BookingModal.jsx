@@ -258,7 +258,27 @@ const PropertyDetailModal = ({ room, onClose }) => {
 
                     <button 
                         type="button" 
-                        onClick={() => alert('Secure booking initiated. Please complete identity verification in the backend integration.')}
+                        onClick={async () => {
+                            try {
+                                const response = await fetch('/api/identity/verify', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        guest_name: 'Verified Diplomat',
+                                        passport_number: 'N-7829-X',
+                                        id_type: 'Diplomatic Passport'
+                                    })
+                                });
+                                const data = await response.json();
+                                alert(`Identity Verification: ${data.status.toUpperCase()}\nRisk Level: ${data.risk_assessment}\nFacial Match: ${(data.facial_match_probability * 100).toFixed(2)}%`);
+                                if (data.status === 'passed') {
+                                    alert('Secure Booking Authorized. Proceeding to encrypted checkout...');
+                                }
+                            } catch (error) {
+                                console.error('Verification failed:', error);
+                                alert('Identity Verification Node Offline. Retrying secure link...');
+                            }
+                        }}
                         className="btn-primary" 
                         style={{ width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                         <Lock size={16} /> Inititate Secure Booking
