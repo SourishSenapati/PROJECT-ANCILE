@@ -1,5 +1,4 @@
 fastapi
-uvicorn
 pydantic
 stripe
 redis
@@ -8,6 +7,3 @@ pandas
 joblib
 scikit-learn
 xgboost
-onnxruntime
-skl2onnx
-onnxmltools
