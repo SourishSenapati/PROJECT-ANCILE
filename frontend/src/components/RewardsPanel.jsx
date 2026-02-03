@@ -18,7 +18,7 @@ const RewardsPanel = () => {
     const progressToNext = nextTier ? ((points - currentTier.min) / (nextTier.min - currentTier.min)) * 100 : 100;
 
     return (
-        <div className="bg-gradient-to-br from-black/40 to-[#d4af37]/5 border border-white/10 rounded-2xl p-8 mt-12">
+        <div id="rewards" className="bg-gradient-to-br from-black/40 to-[#d4af37]/5 border border-white/10 rounded-2xl p-8 mt-12">
             {/* Header */}
             <div className="flex justify-between items-start mb-8">
                 <div>

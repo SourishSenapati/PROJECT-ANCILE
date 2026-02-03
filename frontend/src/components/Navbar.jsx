@@ -70,7 +70,14 @@ const Navbar = () => {
            onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
           Partner Access
         </Link>
-        <button style={buttonStyle}>
+        <button 
+            onClick={() => {
+                const rewardsSection = document.getElementById('rewards');
+                if (rewardsSection) {
+                    rewardsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }}
+            style={buttonStyle}>
           <Wallet size={16} />
           <span>Membership</span>
         </button>

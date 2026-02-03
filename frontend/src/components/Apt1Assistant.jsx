@@ -53,8 +53,8 @@ const Apt1Assistant = () => {
 
         // Simulated Context-Aware Response
         let responseText = "I've updated your view. Based on your request, I strongly recommend the Obsidian Tower.";
-        if (query.toLowerCase().includes('compare')) responseText = "Generating comparison matrix. The Alpine Chalet offers superior kinetic protection, but the Kyoto Fortress has better cyber-shielding.";
-        if (query.toLowerCase().includes('davos')) responseText = "Davos usage is high. I have reserved 3 hold-back units in Sector 4. Shall I release them to your account?";
+        if (userMsg.text.toLowerCase().includes('compare')) responseText = "Generating comparison matrix. The Alpine Chalet offers superior kinetic protection, but the Kyoto Fortress has better cyber-shielding.";
+        if (userMsg.text.toLowerCase().includes('davos')) responseText = "Davos usage is high. I have reserved 3 hold-back units in Sector 4. Shall I release them to your account?";
 
         setMessages(prev => [...prev, { type: 'agent', text: responseText }]);
     };

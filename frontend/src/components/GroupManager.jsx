@@ -46,7 +46,9 @@ const GroupManager = () => {
                         Digitize offline spreadsheets. Manage allocations, room blocks, and P&L for MICE and Weddings.
                     </p>
                 </div>
-                <button className="px-4 py-2 bg-[#d4af37] text-black font-bold rounded flex items-center gap-2 hover:bg-[#e5c14b] transition-colors">
+                <button 
+                    onClick={() => alert('Create New Event functionality will be implemented in backend integration')}
+                    className="px-4 py-2 bg-[#d4af37] text-black font-bold rounded flex items-center gap-2 hover:bg-[#e5c14b] transition-colors">
                     <Plus size={16} /> Create New Event
                 </button>
             </div>
@@ -102,10 +104,17 @@ const GroupManager = () => {
 
                             {/* Actions */}
                             <div className="md:col-span-3 flex flex-col gap-2">
-                                <button className="w-full py-2 bg-transparent border border-white/20 rounded text-sm text-gray-300 hover:text-white hover:border-white transition-colors flex items-center justify-center gap-2">
+                                <button 
+                                    onClick={() => alert(`Viewing analytics for ${evt.name}`)}
+                                    className="w-full py-2 bg-transparent border border-white/20 rounded text-sm text-gray-300 hover:text-white hover:border-white transition-colors flex items-center justify-center gap-2">
                                     <BarChart2 size={14} /> View Analytics
                                 </button>
-                                <button className="w-full py-2 bg-transparent border border-[#d4af37]/30 rounded text-sm text-[#d4af37] hover:bg-[#d4af37]/10 transition-colors flex items-center justify-center gap-2">
+                                <button 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`${window.location.origin}/event/${evt.id}`);
+                                        alert('Microsite URL copied to clipboard');
+                                    }}
+                                    className="w-full py-2 bg-transparent border border-[#d4af37]/30 rounded text-sm text-[#d4af37] hover:bg-[#d4af37]/10 transition-colors flex items-center justify-center gap-2">
                                     <LinkIcon size={14} /> Microsite URL
                                 </button>
                             </div>

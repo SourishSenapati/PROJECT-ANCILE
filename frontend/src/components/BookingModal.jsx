@@ -256,7 +256,11 @@ const PropertyDetailModal = ({ room, onClose }) => {
                         </label>
                     </div>
 
-                    <button type="button" className="btn-primary" style={{ width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                    <button 
+                        type="button" 
+                        onClick={() => alert('Secure booking initiated. Please complete identity verification in the backend integration.')}
+                        className="btn-primary" 
+                        style={{ width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                         <Lock size={16} /> Inititate Secure Booking
                     </button>
                     
