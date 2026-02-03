@@ -1,0 +1,7 @@
+# Ignore everything except frontend
+*
+!frontend/
+!vercel.json
+
+# But include necessary files in frontend
+!frontend/**

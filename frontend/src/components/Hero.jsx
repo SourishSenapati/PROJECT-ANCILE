@@ -102,36 +102,6 @@ const Hero = () => {
            transition={{ duration: 0.8, delay: 0.6 }}
            style={{
              display: 'flex',
-             justifyContent: 'center',
-             gap: '40px',
-             borderTop: '1px solid var(--border-subtle)',
-             paddingTop: '32px',
-             marginTop: '32px'
-           }}
-        >
-           <div style={{ textAlign: 'center' }}>
-             <h4 style={{ fontSize: '1.5rem', margin: 0, color: 'white' }}>120+</h4>
-             <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Global Cities</span>
-           </div>
-           <div style={{ width: '1px', background: 'var(--border-subtle)' }}></div>
-           <div style={{ textAlign: 'center' }}>
-             <h4 style={{ fontSize: '1.5rem', margin: 0, color: 'white' }}>ISO</h4>
-             <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px' }}>27001 Security</span>
-           </div>
-           <div style={{ width: '1px', background: 'var(--border-subtle)' }}></div>
-           <div style={{ textAlign: 'center' }}>
-             <h4 style={{ fontSize: '1.5rem', margin: 0, color: 'white' }}>24/7</h4>
-             <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Rapid Response</span>
-           </div>
-        </motion.div>
-
-        {/* Trust Indicators */}
-        <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           transition={{ duration: 0.8, delay: 0.6 }}
-           style={{
-             display: 'flex',
              flexWrap: 'wrap',
              justifyContent: 'center',
              gap: '24px',
