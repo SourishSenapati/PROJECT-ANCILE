@@ -10,6 +10,8 @@ Ties together:
 5. Viral Growth (Referrals)
 """
 
+from fastapi import UploadFile, File
+import shutil
 import logging
 import os
 # import sys  # Unused
@@ -298,6 +300,43 @@ async def stripe_webhook(request: Request):
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     return {"status": "ignored"}
+
+# --- Admin & Auth Extensions ---
+
+
+class AdminLogin(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/auth/login")
+def admin_login(creds: AdminLogin):
+    """
+    Simple Admin Login (Hardcoded for Demo).
+    """
+    if creds.username == "admin" and creds.password == "oyo-copy":
+        return {"token": "fake-jwt-token-admin-123", "status": "success"}
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+
+@app.post("/admin/upload-footage")
+async def upload_footage(file: UploadFile = File(...)):
+    """
+    Upload real footage of rooms.
+    """
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+
+    return {"filename": file.filename, "url": f"/uploads/{file.filename}"}
 
 # --- Phase 7 & 8 Extensions ---
 
