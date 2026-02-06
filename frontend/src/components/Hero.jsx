@@ -36,10 +36,7 @@ const Hero = () => {
       overflow: 'hidden'
     }}>
       <div style={{ position: 'relative', zIndex: 10, maxWidth: '900px', padding: '0 20px' }}>
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+        <div 
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -57,31 +54,26 @@ const Hero = () => {
           }}
         >
           <Shield size={14} /> The Global Sanctuary Network
-        </motion.div>
+        </div>
         
-        <motion.h1 
-           initial={{ opacity: 0, y: 30 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.8, delay: 0.2 }}
+        <h1 
            style={{
              fontSize: 'clamp(3rem, 6vw, 5.5rem)',
              lineHeight: '1.05',
              margin: '0 0 32px 0',
-             background: 'linear-gradient(135deg, #fff 20%, #888 100%)',
-             WebkitBackgroundClip: 'text',
-             WebkitTextFillColor: 'transparent',
+             color: 'white',
+             /* background: 'linear-gradient(135deg, #fff 20%, #888 100%)', */
+             /* WebkitBackgroundClip: 'text', */
+             /* WebkitTextFillColor: 'transparent', */
              letterSpacing: '-2px',
              fontWeight: 700
            }}
         >
           Silence is the ultimate<br />
           <span style={{ color: 'var(--gold-primary)', WebkitTextFillColor: 'initial', fontStyle: 'italic', fontFamily: 'serif' }}>Luxury.</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+        <p 
           style={{
             fontSize: '1.25rem',
             color: 'var(--text-secondary)',
@@ -93,13 +85,10 @@ const Hero = () => {
         >
           Access a curated network of hyper-secure properties. 
           Audited by PrivacyShield™ for zero-trace stays.
-        </motion.p>
+        </p>
         
         {/* Trust Indicators */}
-        <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           transition={{ duration: 0.8, delay: 0.6 }}
+        <div
            style={{
              display: 'flex',
              flexWrap: 'wrap',
@@ -158,7 +147,7 @@ const Hero = () => {
              <h4 style={{ fontSize: '1.5rem', margin: 0, color: 'white' }}>24/7</h4>
              <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Rapid Response</span>
            </button>
-        </motion.div>
+        </div>
 
        {/* Hologram Overlay removed */}
       </div>

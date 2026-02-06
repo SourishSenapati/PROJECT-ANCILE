@@ -6,10 +6,7 @@ const SearchBar = ({ onSearch }) => {
     const [location, setLocation] = useState('');
     
     return (
-        <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+        <div 
             className="glass-card"
             style={{
                 display: 'flex',
@@ -89,7 +86,7 @@ const SearchBar = ({ onSearch }) => {
                 <Search size={20} />
                 <span>Search</span>
             </button>
-        </motion.div>
+        </div>
     );
 };
 

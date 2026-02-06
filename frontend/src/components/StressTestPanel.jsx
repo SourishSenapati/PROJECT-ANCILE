@@ -19,27 +19,31 @@ const StressTestPanel = () => {
         if (isStressTesting) {
             interval = setInterval(() => {
                 setStats(prev => ({
-                    rps: prev.rps + Math.floor(Math.random() * 500),
-                    latency: Math.min(prev.latency + Math.random() * 10, 500),
-                    threatLevel: prev.rps > 5000 ? 'CRITICAL' : (prev.rps > 3000 ? 'HIGH' : 'ELEVATED'),
+                    rps: prev.rps + Math.floor(Math.random() * 2000),
+                    latency: Math.min(prev.latency + Math.random() * 50, 400),
+                    threatLevel: 'CRITICAL',
                     activeNodes: prev.activeNodes,
-                    load: Math.min(prev.load + Math.random() * 5, 100)
+                    load: Math.min(prev.load + Math.random() * 10, 100)
                 }));
 
                 const logMessages = [
-                    "Injecting SQL payload...",
-                    "DDoS attack simulation: 10k bots",
-                    "Brute-force vector #42 active",
-                    "Rerouting traffic to secure enclave...",
-                    "APT-1 Neural Shield deploying countermeasures...",
                     "Node 42 latency spike detected",
+                    "APT-1 Neural Shield deploying countermeasures...",
+                    "DDoS attack simulation: 10k bots",
                     "Encrypting data at rest...",
-                    "Quantum key distribution engaged"
+                    "Rerouting traffic to secure enclave...",
+                    "Brute-force vector #42 active",
+                    "Quantum key distribution engaged",
+                    "Packet loss detected in Sector 7",
+                    "Firewall integrity verified: 99.9%"
                 ];
 
-                setConsoleLogs(prev => [...prev, logMessages[Math.floor(Math.random() * logMessages.length)]].slice(-10));
+                const message = logMessages[Math.floor(Math.random() * logMessages.length)];
+                const time = new Date().toLocaleTimeString().toLowerCase();
+                
+                setConsoleLogs(prev => [`[${time}] ${message}`, ...prev].slice(0, 8)); // Newest first
 
-            }, 800);
+            }, 200); // Faster updates for intensity
         } else {
             setStats({
                 rps: 1240,

@@ -93,16 +93,11 @@ const InventoryGrid = ({ onBook }) => {
                 </div>
             </div>
             
-            <motion.div layout className="grid-cols-auto-fit">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence>
                 {filteredProperties.map((prop, i) => (
-                    <motion.div 
-                        layout
+                    <div 
                         key={prop.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3 }}
                         className="glass-card hover-lift"
                         style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}
                         onClick={() => onBook(prop)}
@@ -176,10 +171,10 @@ const InventoryGrid = ({ onBook }) => {
                                 </button>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
                 </AnimatePresence>
-            </motion.div>
+            </div>
         </section>
     );
 };

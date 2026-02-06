@@ -69,12 +69,14 @@ button {
 .text-gradient-gold {
   background: linear-gradient(135deg, #fff 0%, #d4af37 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-silver {
   background: linear-gradient(135deg, #fff 0%, #86868b 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

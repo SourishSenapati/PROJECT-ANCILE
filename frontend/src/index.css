@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   /* 7-Star Luxury Palette */
   --bg-deep: #0B0A09; /* Warm, rich black */
@@ -240,4 +242,49 @@ h1, h2, h3, .brand-font {
 
 @media (max-width: 480px) {
   .max-w-\[1440px\] { max-width: 100% !important; }
+}
+
+/* 
+   HOTFIX: Map CSS Variables to Utility Classes used in JSX 
+   (Fixes Black-on-Black text issue if Tailwind doesn't auto-detect these)
+*/
+.bg-deep { background-color: var(--bg-deep); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+
+.text-gold-primary { color: var(--gold-primary); }
+.bg-gold-primary { background-color: var(--gold-primary); }
+
+.border-subtle { border-color: var(--border-subtle); }
+.border-gold-primary { border-color: var(--gold-primary); }
+
+.selection\:bg-gold-primary\/30::selection {
+  background-color: rgba(212, 175, 55, 0.3);
+}
+
+/* Custom Scrollbar - The "Sexy" Update */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-deep); 
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.2); 
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gold-primary); 
+    box-shadow: 0 0 10px var(--gold-primary);
+}
+
+/* Firefox Support */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.2) var(--bg-deep);
 }

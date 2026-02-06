@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Award, TrendingUp, Gift, Star, CreditCard, Zap } from 'lucide-react';
+import { Award, TrendingUp, Gift, Star, CreditCard, Zap, Check } from 'lucide-react';
 
 const TIERS = [
     { name: 'Operative', min: 0, max: 9999, color: '#86868b', benefits: 'Standard booking access' },
@@ -24,8 +24,7 @@ const RewardsPanel = () => {
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left: Membership Card */}
                 <div className="lg:w-1/3">
-                    <motion.div 
-                        whileHover={{ rotateY: 5, rotateX: -5 }}
+                    <div 
                         className={`aspect-[1.6/1] rounded-2xl p-8 flex flex-col justify-between border border-white/20 relative overflow-hidden tier-card-shadow gloss-effect ${tierClass}`}
                     >
                         <div className="flex justify-between items-start">
@@ -51,7 +50,7 @@ const RewardsPanel = () => {
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
 
                     {/* Stats Summary */}
                     <div className="grid grid-cols-2 gap-4 mt-6">
@@ -82,9 +81,8 @@ const RewardsPanel = () => {
                             )}
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                            <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: `${progressToNext}%` }}
+                            <div 
+                                style={{ width: `${progressToNext}%`, transition: 'width 1s ease-out' }}
                                 className="h-full bg-gradient-to-r from-[#d4af37] to-yellow-200"
                             />
                         </div>

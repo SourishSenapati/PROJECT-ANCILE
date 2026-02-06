@@ -7,6 +7,7 @@ for optimistic concurrency control.
 
 import logging
 import uuid
+import fnmatch
 from typing import Dict
 
 import redis
@@ -15,11 +16,58 @@ import redis
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Redis Connection
+# Redis Connection with Fallback
 # In a real app, use environment variables for host/port
 # utilizing decode_responses=True to get strings back instead of bytes
-redis_client = redis.Redis(host='localhost', port=6379,
-                           db=0, decode_responses=True)
+
+
+class MockRedis:
+    """In-memory mock for Redis to allow localhost development without a server."""
+
+    def __init__(self):
+        """Initialize the mock store."""
+        self.store = {}
+        logging.warning(
+            "⚠️ REDIS NOT CONNECTED: Using In-Memory Mock. Do not use in production.")
+
+    def set(self, key, value, ex=None, nx=False):
+        """Simulate REDIS SET command with NX (Not Exists) support."""
+        # _ex (expiry) is ignored in this mock implementation
+        _ = ex
+        if nx and key in self.store:
+            return False
+        self.store[key] = value
+        return True
+
+    def get(self, key):
+        """Simulate REDIS GET command."""
+        return self.store.get(key)
+
+    def delete(self, key):
+        """Simulate REDIS DEL command."""
+        if key in self.store:
+            del self.store[key]
+            return 1
+        return 0
+
+    def scan_iter(self, match="*"):
+        """Simulate REDIS SCAN command using glob matching."""
+        for key in self.store:
+            if fnmatch.fnmatch(key, match):
+                yield key
+
+    def ping(self):
+        """Simulate REDIS PING command."""
+        return True
+
+
+try:
+    redis_client = redis.Redis(
+        host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client.ping()
+    logger.info("✅ Redis Connected Successfully.")
+except redis.ConnectionError:
+    redis_client = MockRedis()
 
 
 class InventoryException(Exception):

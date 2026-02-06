@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, Globe, Server, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, Lock, Globe, Server, AlertCircle, Check } from 'lucide-react';
 
 const TrustCenter = () => {
     const [hoveredBadge, setHoveredBadge] = useState(null);
@@ -42,12 +42,11 @@ const TrustCenter = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {BADGES.map((badge) => (
-                        <motion.div 
+                        <div 
                             key={badge.id}
-                            onHoverStart={() => setHoveredBadge(badge.id)}
-                            onHoverEnd={() => setHoveredBadge(null)}
-                            whileHover={{ y: -5 }}
-                            className="bg-white/[0.03] border border-white/10 p-8 rounded-2xl relative overflow-hidden group glass-card hover:border-[#d4af37]/30 transition-all duration-500"
+                            onMouseEnter={() => setHoveredBadge(badge.id)}
+                            onMouseLeave={() => setHoveredBadge(null)}
+                            className="bg-white/[0.03] border border-white/10 p-8 rounded-2xl relative overflow-hidden group glass-card hover:border-[#d4af37]/30 transition-all duration-500 hover:-translate-y-1"
                         >
                             <div className="flex justify-between items-start mb-6">
                                 <div className="p-3 rounded-xl bg-black/40 border border-white/5 transition-transform group-hover:scale-110 duration-500">
@@ -72,19 +71,16 @@ const TrustCenter = () => {
                             {/* Hover Expansion Effect */}
                             <AnimatePresence>
                                 {hoveredBadge === badge.id && (
-                                    <motion.div 
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
-                                        className="absolute inset-x-0 bottom-0 bg-[#121214] border-t border-[#d4af37]/40 p-6 z-20"
+                                    <div 
+                                        className="absolute inset-x-0 bottom-0 bg-[#121214] border-t border-[#d4af37]/40 p-6 z-20 animate-slide-up"
                                     >
                                         <p className="text-xs text-gray-300 leading-relaxed italic">
                                             "{badge.longDesc}"
                                         </p>
-                                    </motion.div>
+                                    </div>
                                 )}
                             </AnimatePresence>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
 

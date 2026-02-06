@@ -1,39 +1,8 @@
-# Vercel Deployment Optimization
-# ------------------------------
-
-# Ignore all node_modules and virtual environments
-**/node_modules/
-**/.venv/
-**/venv/
-**/env/
-**/__pycache__/
-**/*.pyc
-.vercel/
-
-# Ignore local dev/build artifacts
-frontend/dist/
-frontend/node_modules/
-
-# Ignore local data and large source files
-ml_engine/
-*.csv
-*.sql
-*.log
-Dockerfile
-docker-compose.yml
-frontend_vanilla/
-
-# Ignore other non-essential files
-LICENSE
-README.md
-FRONTEND_VERIFICATION.md
-TRUST_INDICATORS_UPDATE.md
-VERCEL_DEPLOYMENT.md
-DEPLOYMENT_FIX_GUIDE.md
-
-# Ensure core application files are included
-!api/
-!backend/
-!frontend/
-!vercel.json
-!requirements.txt
+node_modules
+.venv
+venv
+env
+__pycache__
+.vercel
+frontend/node_modules
+# Removed frontend/dist from ignore to allow Python backend to serve it

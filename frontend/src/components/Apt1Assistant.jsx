@@ -27,10 +27,11 @@ const Apt1Assistant = () => {
         scrollToBottom();
     }, [messages, thoughtProcess]);
 
-    const handleSend = async () => {
-        if (!query.trim()) return;
+    const handleSend = async (manualQuery = null) => {
+        const textToSend = manualQuery || query;
+        if (!textToSend.trim()) return;
 
-        const userMsg = { type: 'user', text: query };
+        const userMsg = { type: 'user', text: textToSend };
         setMessages(prev => [...prev, userMsg]);
         setQuery('');
         setIsTyping(true);
@@ -39,13 +40,13 @@ const Apt1Assistant = () => {
         const steps = [
             "Parsing intent...",
             "Querying secure inventory database...",
-            `Cross-referencing threat intel for "${userMsg.text}"...`,
+            `Cross-referencing threat intel for "${textToSend.substring(0, 15)}..."`,
             "Optimizing logistics...",
         ];
 
         for (let i = 0; i < steps.length; i++) {
             setThoughtProcess(steps[i]);
-            await new Promise(r => setTimeout(r, 800));
+            await new Promise(r => setTimeout(r, 600));
         }
 
         setThoughtProcess(null);
@@ -53,8 +54,23 @@ const Apt1Assistant = () => {
 
         // Simulated Context-Aware Response
         let responseText = "I've updated your view. Based on your request, I strongly recommend the Obsidian Tower.";
-        if (userMsg.text.toLowerCase().includes('compare')) responseText = "Generating comparison matrix. The Alpine Chalet offers superior kinetic protection, but the Kyoto Fortress has better cyber-shielding.";
-        if (userMsg.text.toLowerCase().includes('davos')) responseText = "Davos usage is high. I have reserved 3 hold-back units in Sector 4. Shall I release them to your account?";
+        const lowerText = textToSend.toLowerCase();
+
+        if (lowerText.includes('compare')) {
+            responseText = "Generating comparison matrix. \n\n**Alpine Chalet**: Superior kinetic protection (VR10), but remote.\n**Kyoto Fortress**: Highest cyber-shielding rating, zero-latency comms.\n\nRecommendation: Kyoto for digital operations, Alpine for physical isolation.";
+        }
+        if (lowerText.includes('davos')) {
+            responseText = "Davos usage is high. I have reserved 3 hold-back units in Sector 4. Shall I release them to your account?";
+        }
+        if (lowerText.includes('glass') || lowerText.includes('br6')) {
+            responseText = "Scanning inventory for BR6+ Ballistic Glazing...\n\nFound 3 matches:\n1. The Obsidian Tower (New York)\n2. Ancile Prime (Dubai)\n3. Alpine Secure Chalet (Switzerland)\n\nFiltering view now.";
+        }
+        if (lowerText.includes('tokyo')) {
+             responseText = "Drafting Extraction Protocol: TOKYO-ALPHA.\n\nPrimary Route: Roof Helipad -> Haneda Private Terminal.\nSecondary Route: Sub-level Service Tunnel -> Secure Metro Line.\n\nAsset Team 'Ronin' is on standby.";
+        }
+        if (lowerText.includes('new york') || lowerText.includes('threat')) {
+            responseText = "Threat Analysis: NEW YORK SECTOR.\n\nCurrent Level: ELEVATED.\nDetected Chatter: Financial espionage targeting diplomatic convoys.\n\nAdvisory: Use armored transport options.";
+        }
 
         setMessages(prev => [...prev, { type: 'agent', text: responseText }]);
     };
@@ -62,103 +78,96 @@ const Apt1Assistant = () => {
     return (
         <>
             {/* Expanded Interface */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-24 right-6 w-[400px] h-[600px] bg-[#0f0f12]/95 backdrop-blur-xl border border-[#d4af37]/30 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
-                        style={{ boxShadow: '0 0 50px rgba(212, 175, 55, 0.1)' }}
-                    >
-                        {/* Header */}
-                        <div className="p-4 border-b border-white/10 bg-gradient-to-r from-[#d4af37]/10 to-transparent flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <div className="w-2 h-2 bg-[#d4af37] rounded-full animate-ping absolute"></div>
-                                    <Cpu size={20} className="text-[#d4af37] relative z-10" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-white text-sm">APT-1 Agent</h3>
-                                    <div className="text-[10px] text-[#d4af37] font-mono tracking-wider">ONLINE // TIER 0 ACCESS</div>
+            {isOpen && (
+                <div
+                    className="fixed bottom-24 right-6 w-[400px] h-[600px] bg-[#0f0f12]/95 backdrop-blur-xl border border-[#d4af37]/30 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in-up"
+                    style={{ boxShadow: '0 0 50px rgba(212, 175, 55, 0.1)' }}
+                >
+                    {/* Header */}
+                    <div className="p-4 border-b border-white/10 bg-gradient-to-r from-[#d4af37]/10 to-transparent flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <div className="w-2 h-2 bg-[#d4af37] rounded-full animate-ping absolute"></div>
+                                <Cpu size={20} className="text-[#d4af37] relative z-10" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-white text-sm">APT-1 Agent</h3>
+                                <div className="text-[10px] text-[#d4af37] font-mono tracking-wider">ONLINE // TIER 0 ACCESS</div>
+                            </div>
+                        </div>
+                        <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
+                            <X size={18} />
+                        </button>
+                    </div>
+
+                    {/* Chat Area */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+                        {messages.map((msg, i) => (
+                            <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[85%] p-3 rounded-xl text-sm ${
+                                    msg.type === 'user' 
+                                        ? 'bg-[#d4af37] text-black font-medium rounded-br-none' 
+                                        : 'bg-white/10 text-gray-200 border border-white/5 rounded-bl-none'
+                                }`}>
+                                    {msg.text}
                                 </div>
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        {/* Chat Area */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-                            {messages.map((msg, i) => (
-                                <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] p-3 rounded-xl text-sm ${
-                                        msg.type === 'user' 
-                                            ? 'bg-[#d4af37] text-black font-medium rounded-br-none' 
-                                            : 'bg-white/10 text-gray-200 border border-white/5 rounded-bl-none'
-                                    }`}>
-                                        {msg.text}
-                                    </div>
-                                </div>
-                            ))}
-                            
-                            {/* Chain of Thought Visualization */}
-                            {thoughtProcess && (
-                                <div className="flex justify-start">
-                                    <motion.div 
-                                        initial={{ opacity: 0 }} 
-                                        animate={{ opacity: 1 }}
-                                        className="bg-black/40 border border-[#d4af37]/20 p-3 rounded-xl max-w-[85%] text-xs font-mono text-[#d4af37]/80 flex items-center gap-2"
-                                    >
-                                        <Layers size={12} className="animate-pulse" />
-                                        {thoughtProcess}
-                                    </motion.div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        {/* Suggestions */}
-                        {messages.length === 1 && !thoughtProcess && (
-                            <div className="px-4 pb-2">
-                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Capabilities</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {SUGGESTIONS.map(s => (
-                                        <button 
-                                            key={s} 
-                                            onClick={() => { setQuery(s); handleSend(); }}
-                                            className="text-xs bg-white/5 hover:bg-[#d4af37]/20 hover:text-[#d4af37] border border-white/10 text-gray-400 px-3 py-1.5 rounded-full transition-colors truncate max-w-full"
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
+                        ))}
+                        
+                        {/* Chain of Thought Visualization */}
+                        {thoughtProcess && (
+                            <div className="flex justify-start">
+                                <div 
+                                    className="bg-black/40 border border-[#d4af37]/20 p-3 rounded-xl max-w-[85%] text-xs font-mono text-[#d4af37]/80 flex items-center gap-2 animate-pulse"
+                                >
+                                    <Layers size={12} className="animate-spin" />
+                                    {thoughtProcess}
                                 </div>
                             </div>
                         )}
+                        <div ref={messagesEndRef} />
+                    </div>
 
-                        {/* Input Area */}
-                        <div className="p-4 border-t border-white/10 bg-black/20">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                                    placeholder="Command APT-1..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white focus:outline-none focus:border-[#d4af37]/50 transition-colors"
-                                />
-                                <button 
-                                    onClick={handleSend}
-                                    disabled={!query.trim() || isTyping}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[#d4af37] text-black rounded-md hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 transition-all"
-                                >
-                                    <ArrowRight size={16} />
-                                </button>
+                    {/* Suggestions */}
+                    {messages.length === 1 && !thoughtProcess && (
+                        <div className="px-4 pb-2">
+                            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Capabilities</p>
+                            <div className="flex flex-wrap gap-2">
+                                {SUGGESTIONS.map(s => (
+                                    <button 
+                                        key={s} 
+                                        onClick={() => { setQuery(s); handleSend(s); }}
+                                        className="text-xs bg-white/5 hover:bg-[#d4af37]/20 hover:text-[#d4af37] border border-white/10 text-gray-400 px-3 py-1.5 rounded-full transition-colors truncate max-w-full"
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+
+                    {/* Input Area */}
+                    <div className="p-4 border-t border-white/10 bg-black/20">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                                placeholder="Command APT-1..."
+                                className="w-full bg-white/5 border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white focus:outline-none focus:border-[#d4af37]/50 transition-colors"
+                            />
+                            <button 
+                                onClick={() => handleSend()}
+                                disabled={!query.trim() || isTyping}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[#d4af37] text-black rounded-md hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 transition-all"
+                            >
+                                <ArrowRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Floating Orb Button */}
             <motion.button
